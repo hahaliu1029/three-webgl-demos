@@ -563,10 +563,10 @@ var _orbitControls = require("three/examples/jsm/controls/OrbitControls");
 var _gsap = require("gsap");
 var _gsapDefault = parcelHelpers.interopDefault(_gsap);
 // 倒入顶点着色器
-var _vertexGlsl = require("./raw/vertex.glsl");
+var _vertexGlsl = require("./deep/vertex.glsl");
 var _vertexGlslDefault = parcelHelpers.interopDefault(_vertexGlsl);
 // 倒入片元着色器
-var _fragmentGlsl = require("./raw/fragment.glsl");
+var _fragmentGlsl = require("./deep/fragment.glsl");
 var _fragmentGlslDefault = parcelHelpers.interopDefault(_fragmentGlsl);
 // console.log(THREE)
 const scene = new _three.Scene();
@@ -588,36 +588,35 @@ scene.add(axesHelper);
 const textureLoader = new _three.TextureLoader();
 const texture = textureLoader.load("./img/sea.png");
 // 创建着色器材质
-// const shaderMaterial = new THREE.ShaderMaterial({
-//   vertexShader: basicVertexShader,
-//   fragmentShader: basicFragmentShader,
-//   uniforms: {
-//     u_time: { value: 0 },
-//   },
-//   side: THREE.DoubleSide,
-// });
-// 创建原始着色器材质
-const rawShaderMaterial = new _three.RawShaderMaterial({
+const shaderMaterial = new _three.ShaderMaterial({
     vertexShader: (0, _vertexGlslDefault.default),
     fragmentShader: (0, _fragmentGlslDefault.default),
     uniforms: {
         u_time: {
             value: 0
-        },
-        u_texture: {
-            value: texture
         }
     },
     side: _three.DoubleSide
 });
+// // 创建原始着色器材质
+// const rawShaderMaterial = new THREE.RawShaderMaterial({
+//   vertexShader: basicVertexShader,
+//   fragmentShader: basicFragmentShader,
+//   uniforms: {
+//     u_time: { value: 0 },
+//     u_texture: { value: texture },
+//   },
+//   side: THREE.DoubleSide,
+// //   wireframe: true,
+// });
 // 创建平面
 const planeGeometry = new _three.PlaneGeometry(10, 10, 64, 64);
 // 使用基础材质
-const planeMaterial = new _three.MeshBasicMaterial({
-    color: 0x00ff00,
-    side: _three.DoubleSide
-});
-const plane = new _three.Mesh(planeGeometry, rawShaderMaterial);
+// const planeMaterial = new THREE.MeshBasicMaterial({
+//   color: 0x00ff00,
+//   side: THREE.DoubleSide,
+// });
+const plane = new _three.Mesh(planeGeometry, shaderMaterial);
 plane.rotation.x = Math.PI / 2;
 // plane.receiveShadow = true;
 scene.add(plane);
@@ -643,16 +642,16 @@ function animate() {
     // required if controls.enableDamping or controls.autoRotate are set to true
     controls.update();
     // 更新着色器材质中的时间
-    rawShaderMaterial.uniforms.u_time.value = time;
+    //   rawShaderMaterial.uniforms.u_time.value = time;
     // 更新着色器材质中的时间
-    // shaderMaterial.uniforms.u_time.value = time;
+    shaderMaterial.uniforms.u_time.value = time;
     // 更新光线辅助器
     dirLightHelper.update();
     renderer.render(scene, camera);
 }
 animate();
 
-},{"three":"ktPTu","three/examples/jsm/controls/OrbitControls":"7mqRv","gsap":"fPSuC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./raw/vertex.glsl":"ef0CP","./raw/fragment.glsl":"2ZH6Q"}],"ktPTu":[function(require,module,exports) {
+},{"three":"ktPTu","three/examples/jsm/controls/OrbitControls":"7mqRv","gsap":"fPSuC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","./deep/vertex.glsl":"kkVNo","./deep/fragment.glsl":"03FUb"}],"ktPTu":[function(require,module,exports) {
 /**
  * @license
  * Copyright 2010-2023 Three.js Authors
@@ -35423,11 +35422,11 @@ var CSSPlugin = {
 });
 (0, _gsapCoreJs.gsap).registerPlugin(CSSPlugin);
 
-},{"./gsap-core.js":"05eeC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ef0CP":[function(require,module,exports) {
-module.exports = "precision mediump float;\n#define GLSLIFY 1\nattribute vec3 position;\nattribute vec3 normal;\nattribute vec2 uv;\nattribute vec4 tangent;\nattribute vec4 bitangent;\nuniform float time;\nuniform mat4 modelViewMatrix;\nuniform mat4 projectionMatrix;\n// 获取时间\nuniform float u_time;\nvarying vec2 vUv;\nvarying float vHeight;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  // gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n  // 获取高度\n  vHeight = position.y;\n  // 波浪效果随时间变化\n  float wave = sin(position.x * 10.0 + u_time) * 0.1;\n  // 波浪效果随高度变化\n  float waveHeight = sin(position.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv = sin(uv.x * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv2 = sin(uv.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv3 = sin(uv.x * 10.0 + uv.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv4 = sin(uv.x * 10.0 + uv.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv5 = sin(uv.x * 10.0 + uv.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv6 = sin(uv.x * 10.0 + uv.y * 10.0 + u_time) * 0.1;\n  // 波浪效果随 uv 变化\n  float waveUv7 = sin(uv.x * 10.0 + uv.y * 10.0 + u_time) * 0.1;\n\n  // 设置位置\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x + wave + waveUv + waveUv2 + waveUv3 + waveUv4 + waveUv5 + waveUv6 + waveUv7, position.y + waveHeight, position.z + wave + waveUv + waveUv2 + waveUv3 + waveUv4 + waveUv5 + waveUv6 + waveUv7, 1.0);\n}\n";
+},{"./gsap-core.js":"05eeC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"kkVNo":[function(require,module,exports) {
+module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);\n}";
 
-},{}],"2ZH6Q":[function(require,module,exports) {
-module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvarying float vHeight;\nuniform float u_time; // uniform 表示变量为可读可写变量 与 attribute 的区别是 uniform 可以在顶点着色器和片元着色器中使用 attribute 只能在顶点着色器中使用 varying 可以在顶点着色器和片元着色器中使用\nuniform sampler2D u_texture;\n\nvoid main() {\n  float color = vHeight / 2.0 + 0.5;\n  // 根据纹理坐标获取纹素颜色\n  vec4 textureColor = texture2D(u_texture, vUv);\n  gl_FragColor = textureColor;\n  // gl_FragColor = vec4(vUv.x, vUv.y, sin(u_time), 1.0); \n}";
+},{}],"03FUb":[function(require,module,exports) {
+module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nuniform float u_time; // uniform 表示变量为可读可写变量 与 attribute 的区别是 uniform 可以在顶点着色器和片元着色器中使用 attribute 只能在顶点着色器中使用 varying 可以在顶点着色器和片元着色器中使用\nvoid main() {\n  gl_FragColor = vec4(vUv.x, vUv.y, sin(u_time), 1.0);\n}";
 
 },{}]},["1IXIY","2yF9L"], "2yF9L", "parcelRequire37c6")
 

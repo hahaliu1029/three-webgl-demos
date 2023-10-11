@@ -1,11 +1,24 @@
+/**
+ * 使用Three.js实现的动画效果示例，基于自定义GLSL着色器。
+ * 
+ * 功能概述:
+ * - 初始化Three.js的基础组件，如场景、摄像机、渲染器等。
+ * - 导入自定义的GLSL顶点和片元着色器。
+ * - 设置纹理贴图和光照。
+ * - 使用RawShaderMaterial应用自定义着色器。
+ * - 创建一个平面几何体并应用着色器材质，以展示动画效果。
+ * - 通过一个动画循环，实时更新着色器中的时间uniform，从而在材质上创建动画效果。
+ * 
+ * 注意：该文件展示了如何结合Three.js和GLSL来实现基于着色器的动画效果。
+ */
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
 
 // 倒入顶点着色器
-import basicVertexShader from "./deep/vertex.glsl";
+import basicVertexShader from "./raw/vertex.glsl";
 // 倒入片元着色器
-import basicFragmentShader from "./deep/fragment.glsl";
+import basicFragmentShader from "./raw/fragment.glsl";
 // console.log(THREE)
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -35,35 +48,35 @@ const textureLoader = new THREE.TextureLoader();
 const texture = textureLoader.load("./img/sea.png");
 
 // 创建着色器材质
-const shaderMaterial = new THREE.ShaderMaterial({
-  vertexShader: basicVertexShader,
-  fragmentShader: basicFragmentShader,
-  uniforms: {
-    u_time: { value: 0 },
-  },
-  side: THREE.DoubleSide,
-});
-
-// // 创建原始着色器材质
-// const rawShaderMaterial = new THREE.RawShaderMaterial({
+// const shaderMaterial = new THREE.ShaderMaterial({
 //   vertexShader: basicVertexShader,
 //   fragmentShader: basicFragmentShader,
 //   uniforms: {
 //     u_time: { value: 0 },
-//     u_texture: { value: texture },
 //   },
 //   side: THREE.DoubleSide,
-// //   wireframe: true,
 // });
+
+// 创建原始着色器材质
+const rawShaderMaterial = new THREE.RawShaderMaterial({
+  vertexShader: basicVertexShader,
+  fragmentShader: basicFragmentShader,
+  uniforms: {
+    u_time: { value: 0 },
+    u_texture: { value: texture },
+  },
+  side: THREE.DoubleSide,
+//   wireframe: true,
+});
 
 // 创建平面
 const planeGeometry = new THREE.PlaneGeometry(10, 10, 64, 64);
 // 使用基础材质
-// const planeMaterial = new THREE.MeshBasicMaterial({
-//   color: 0x00ff00,
-//   side: THREE.DoubleSide,
-// });
-const plane = new THREE.Mesh(planeGeometry, shaderMaterial);
+const planeMaterial = new THREE.MeshBasicMaterial({
+  color: 0x00ff00,
+  side: THREE.DoubleSide,
+});
+const plane = new THREE.Mesh(planeGeometry, rawShaderMaterial);
 plane.rotation.x = Math.PI / 2;
 // plane.receiveShadow = true;
 scene.add(plane);
@@ -95,9 +108,9 @@ function animate() {
   controls.update();
 
   // 更新着色器材质中的时间
-//   rawShaderMaterial.uniforms.u_time.value = time;
+  rawShaderMaterial.uniforms.u_time.value = time;
   // 更新着色器材质中的时间
-  shaderMaterial.uniforms.u_time.value = time;
+  // shaderMaterial.uniforms.u_time.value = time;
   // 更新光线辅助器
   dirLightHelper.update();
 
