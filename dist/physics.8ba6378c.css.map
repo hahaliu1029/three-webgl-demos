@@ -1,0 +1,1 @@
+{"mappings":"AAAA;;;;;AAKA","sources":["src/assets/css/physics.css"],"sourcesContent":["* {\n    margin: 0;\n    padding: 0;\n}\n\nbody {\n    background-color: skyblue;\n}"],"names":[],"version":3,"file":"physics.8ba6378c.css.map","sourceRoot":"/__parcel_source_root/"}

@@ -1,0 +1,29 @@
+{
+  "name": "three-study",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "page": "parcel src/page.html",
+    "physics": "parcel src/physics.html",
+    "webgl": "parcel src/webgl.html",
+    "shader": "parcel src/shader.html",
+    "build": "parcel build"
+  },
+  "devDependencies": {
+    "@parcel/transformer-glsl": "^2.8.3",
+    "parcel": "latest",
+    "process": "^0.11.10"
+  },
+  "dependencies": {
+    "cannon-es": "^0.20.0",
+    "dat.gui": "^0.7.9",
+    "es6-tween": "^5.5.11",
+    "gsap": "^3.11.5",
+    "three": "^0.157.0"
+  }
+}
