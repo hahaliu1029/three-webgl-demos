@@ -581,7 +581,7 @@ scene.add(camera);
 const renderer = new _three.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 // 开启场景阴影贴图
-renderer.shadowMap.enabled = true;
+// renderer.shadowMap.enabled = true;
 renderer.toneMapping = _three.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.3;
 // renderer.toneMapping = THREE.LinearToneMapping;
@@ -35402,10 +35402,10 @@ var CSSPlugin = {
 (0, _gsapCoreJs.gsap).registerPlugin(CSSPlugin);
 
 },{"./gsap-core.js":"05eeC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hnJp0":[function(require,module,exports) {
-module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvarying vec4 vPosition;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n  vPosition = modelPosition;\n  vec4 viewPosition = viewMatrix * modelPosition;\n  gl_Position = projectionMatrix * viewPosition;\n}";
+module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvarying vec4 vPosition;\nvarying vec3 gPostion;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n  gPostion = position;\n  vPosition = modelPosition;\n  vec4 viewPosition = viewMatrix * modelPosition;\n  gl_Position = projectionMatrix * viewPosition;\n}";
 
 },{}],"hvyDG":[function(require,module,exports) {
-module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec4 vPosition;\n\nvoid main() {\n  gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n}";
+module.exports = "precision lowp float;\n#define GLSLIFY 1\nvarying vec4 vPosition;\nvarying vec3 gPostion;\n\nvoid main() {\n  vec4 redColor = vec4(1.0, 0.0, 0.0, 1.0);\n  vec4 yellowColor = vec4(1.0, 1.0, 0.0, 1.0);\n  vec4 mixColor = mix(yellowColor, redColor, vPosition.y / 3.0);\n  // 判断正面\n  if(gl_FrontFacing) {\n     gl_FragColor = vec4(mixColor.xyz - vPosition.y / 100.0 - 0.5, 1.0);\n  } else {\n     gl_FragColor = vec4(mixColor.xyz, 1.0);\n  }\n}";
 
 },{}],"cfP3d":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");

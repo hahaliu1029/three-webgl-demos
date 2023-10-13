@@ -28,7 +28,7 @@ scene.add(camera);
 const renderer = new THREE.WebGLRenderer();
 renderer.setSize(window.innerWidth, window.innerHeight);
 // 开启场景阴影贴图
-renderer.shadowMap.enabled = true;
+// renderer.shadowMap.enabled = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.3;
 // renderer.toneMapping = THREE.LinearToneMapping;
