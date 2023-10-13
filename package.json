@@ -12,6 +12,7 @@
     "physics": "parcel src/physics.html",
     "webgl": "parcel src/webgl.html",
     "shader": "parcel src/shader.html",
+    "flylight": "parcel src/flylight.html",
     "build": "parcel build"
   },
   "devDependencies": {

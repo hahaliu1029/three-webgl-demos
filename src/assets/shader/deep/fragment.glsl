@@ -15,6 +15,15 @@ vec2 rotate(vec2 uv, float rotation, vec2 mid) {
   return rotationMatrix * (uv - mid) + mid;
 }
 
+// 噪声函数
+float noise(vec2 uv) {
+  vec2 i = floor(uv); // floor 返回小于或等于 x 的最大整数
+  vec2 f = fract(uv); // fract 返回 x - floor(x)
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(random(i), random(i + vec2(1.0, 0.0)), u.x),
+    mix(random(i + vec2(0.0, 1.0)), random(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
 void main() {
   // float strength = mod(vUv.y * 10.0, 1.0);// mod 取余数 10.0 表示 10.0 为浮点数 1.0 表示 1.0 为浮点数 两个浮点数相除结果为浮点数 两个整数相除结果为整数 10.0 为浮点数 10 为整数
   // strength = step(0.5, strength); // step(a, b) 如果 b < a 返回 0.0 否则返回 1.0
@@ -82,4 +91,11 @@ void main() {
   // float angle = atan(vUv.y - 0.5, vUv.x - 0.5); // atan(y, x) 返回点 (x, y) 与正 x 轴之间的角度
   // float strength = (angle + 3.14) / 6.28;
   // gl_FragColor = vec4(strength, strength, strength, alpha);
+
+  // 使用噪声函数实现螺旋渐变
+  // float alpha = 1.0 - step(0.5, distance(vUv, vec2(0.5)));
+  // float angle = atan(vUv.y - 0.5, vUv.x - 0.5);
+  // float strength = noise(vec2(angle * 10.0, u_time));
+  // gl_FragColor = vec4(strength, strength, strength, alpha);
+
 }
