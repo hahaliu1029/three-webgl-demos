@@ -38,6 +38,11 @@ const controls = new OrbitControls(camera, renderer.domElement);
 // 设置控制器阻尼
 controls.enableDamping = true;
 controls.update();
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.1;
+// controls.enablePan = false;
+controls.maxPolarAngle = Math.PI / 4 * 3;
+controls.minPolarAngle = Math.PI / 4 * 3;
 // 创建坐标轴
 // const axesHelper = new THREE.AxesHelper(5);
 // scene.add(axesHelper);
@@ -49,6 +54,14 @@ rgbeLoader.loadAsync("./model/night.hdr").then((texture) => {
   scene.environment = texture;
   scene.background = texture;
 });
+// 创建着色器材质
+const shaderMaterial = new THREE.ShaderMaterial({
+  vertexShader: basicVertexShader,
+  fragmentShader: basicFragmentShader,
+  uniforms: {},
+  side: THREE.DoubleSide,
+  // transparent: true,
+});
 
 const gltfLoader = new GLTFLoader();
 let flylightBox = null;
@@ -58,18 +71,38 @@ gltfLoader.load("./model/kongmingdeng.glb", (gltf) => {
   // model.scale.set(0.1, 0.1, 0.1);
   // model.position.set(0, -5, 0);
   lightBox = gltf.scene.children[0];
-  lightBox.material = shaderMaterial;
-  scene.add(model);
+  // 获取模型高度
+  const box = new THREE.Box3().setFromObject(lightBox);
+  const height = box.max.y - box.min.y;
+  console.log(height);
+  gltf.scene.children[0].material = shaderMaterial;
+  // scene.add(model);
+  for (let i = 0; i < 150; i++) {
+    const flylight = model.clone(true);
+    let x = (Math.random() - 0.5) * 300;
+    let z = (Math.random() - 0.5) * 300;
+    let y = Math.random() + 25;
+    flylight.position.set(x, y, z);
+    gsap.to(flylight.rotation, {
+      duration: 5 + Math.random() * 30,
+      y: Math.PI * 2,
+      repeat: -1,
+      ease: "none",
+    });
+    gsap.to(flylight.position, {
+      duration: 5 + Math.random() * 30,
+      // 上升
+      y:" +=" + Math.random() * 20,
+      x: "+=" + Math.random(),
+      yoyo: true,
+      repeat: -1,
+      ease: "none",
+    });
+    scene.add(flylight);
+  }
 });
 
-// 创建着色器材质
-const shaderMaterial = new THREE.ShaderMaterial({
-  vertexShader: basicVertexShader,
-  fragmentShader: basicFragmentShader,
-  uniforms: {},
-  side: THREE.DoubleSide,
-  transparent: true,
-});
+
 
 // 设置时钟
 const clock = new THREE.Clock();

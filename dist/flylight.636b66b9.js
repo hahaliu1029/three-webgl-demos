@@ -590,6 +590,11 @@ const controls = new (0, _orbitControls.OrbitControls)(camera, renderer.domEleme
 // 设置控制器阻尼
 controls.enableDamping = true;
 controls.update();
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.1;
+// controls.enablePan = false;
+controls.maxPolarAngle = Math.PI / 4 * 3;
+controls.minPolarAngle = Math.PI / 4 * 3;
 // 创建坐标轴
 // const axesHelper = new THREE.AxesHelper(5);
 // scene.add(axesHelper);
@@ -600,6 +605,13 @@ rgbeLoader.loadAsync("./model/night.hdr").then((texture)=>{
     scene.environment = texture;
     scene.background = texture;
 });
+// 创建着色器材质
+const shaderMaterial = new _three.ShaderMaterial({
+    vertexShader: (0, _vertexGlslDefault.default),
+    fragmentShader: (0, _fragmentGlslDefault.default),
+    uniforms: {},
+    side: _three.DoubleSide
+});
 const gltfLoader = new (0, _gltfloaderJs.GLTFLoader)();
 let flylightBox = null;
 gltfLoader.load("./model/kongmingdeng.glb", (gltf)=>{
@@ -608,16 +620,35 @@ gltfLoader.load("./model/kongmingdeng.glb", (gltf)=>{
     // model.scale.set(0.1, 0.1, 0.1);
     // model.position.set(0, -5, 0);
     lightBox = gltf.scene.children[0];
-    lightBox.material = shaderMaterial;
-    scene.add(model);
-});
-// 创建着色器材质
-const shaderMaterial = new _three.ShaderMaterial({
-    vertexShader: (0, _vertexGlslDefault.default),
-    fragmentShader: (0, _fragmentGlslDefault.default),
-    uniforms: {},
-    side: _three.DoubleSide,
-    transparent: true
+    // 获取模型高度
+    const box = new _three.Box3().setFromObject(lightBox);
+    const height = box.max.y - box.min.y;
+    console.log(height);
+    gltf.scene.children[0].material = shaderMaterial;
+    // scene.add(model);
+    for(let i = 0; i < 150; i++){
+        const flylight = model.clone(true);
+        let x = (Math.random() - 0.5) * 300;
+        let z = (Math.random() - 0.5) * 300;
+        let y = Math.random() + 25;
+        flylight.position.set(x, y, z);
+        (0, _gsapDefault.default).to(flylight.rotation, {
+            duration: 5 + Math.random() * 30,
+            y: Math.PI * 2,
+            repeat: -1,
+            ease: "none"
+        });
+        (0, _gsapDefault.default).to(flylight.position, {
+            duration: 5 + Math.random() * 30,
+            // 上升
+            y: " +=" + Math.random() * 20,
+            x: "+=" + Math.random(),
+            yoyo: true,
+            repeat: -1,
+            ease: "none"
+        });
+        scene.add(flylight);
+    }
 });
 // 设置时钟
 const clock = new _three.Clock();
@@ -35402,10 +35433,10 @@ var CSSPlugin = {
 (0, _gsapCoreJs.gsap).registerPlugin(CSSPlugin);
 
 },{"./gsap-core.js":"05eeC","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"hnJp0":[function(require,module,exports) {
-module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvarying vec4 vPosition;\nvarying vec3 gPostion;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  vec4 modelPosition = modelMatrix * vec4(position, 1.0);\n  gPostion = position;\n  vPosition = modelPosition;\n  vec4 viewPosition = viewMatrix * modelPosition;\n  gl_Position = projectionMatrix * viewPosition;\n}";
+module.exports = "precision mediump float;\n#define GLSLIFY 1\nvarying vec2 vUv;\nvarying vec4 vPosition;\nvarying vec4 gPosition;\nvoid main() {\n  vUv = uv; // uv 表示顶点的纹理坐标 0,0 表示左下角 1,1 表示右上角 0.5,0.5 表示中心点 0,1 表示左上角 1,0 表示右下角 0,0.5 表示左中点 1,0.5 表示右中点 0.5,0 表示下中点 0.5,1 表示上中点\n  vec4 modelPosition = modelMatrix * vec4(position.xyz, 1.0);\n  gPosition = vec4(position.xyz, 1.0);\n  vec4 viewPosition = viewMatrix * modelPosition; // 模型视图矩阵\n  vPosition = modelPosition;\n  gl_Position = projectionMatrix * viewPosition;\n}";
 
 },{}],"hvyDG":[function(require,module,exports) {
-module.exports = "precision lowp float;\n#define GLSLIFY 1\nvarying vec4 vPosition;\nvarying vec3 gPostion;\n\nvoid main() {\n  vec4 redColor = vec4(1.0, 0.0, 0.0, 1.0);\n  vec4 yellowColor = vec4(1.0, 1.0, 0.0, 1.0);\n  vec4 mixColor = mix(yellowColor, redColor, vPosition.y / 3.0);\n  // 判断正面\n  if(gl_FrontFacing) {\n     gl_FragColor = vec4(mixColor.xyz - vPosition.y / 100.0 - 0.5, 1.0);\n  } else {\n     gl_FragColor = vec4(mixColor.xyz, 1.0);\n  }\n}";
+module.exports = "precision lowp float;\n#define GLSLIFY 1\nvarying vec4 vPosition;\nvarying vec4 gPosition;\n\nvoid main() {\n   vec4 redColor = vec4(1.0, 0.0, 0.0, 1.0);\n   vec4 yellowColor = vec4(1.0, 1.0, 0.0, 1.0);\n\n  // 根据模型坐标系混合颜色 gPosition是模型坐标\n   vec4 mixColor = mix(yellowColor, redColor, (gPosition.y + 3.0) / 3.0);\n\n  // 判断正面\n   if(gl_FrontFacing) {\n   // 根据世界坐标系绘制颜色 vPosition是世界坐标\n      gl_FragColor = vec4(mixColor.xyz - (vPosition.y - 20.0 ) / 80.0 - 0.1 , 1.0);\n   } else {\n      gl_FragColor = vec4(mixColor.xyz, 1.0);\n   }\n}";
 
 },{}],"cfP3d":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
