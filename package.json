@@ -13,6 +13,7 @@
     "webgl": "parcel src/webgl.html",
     "shader": "parcel src/shader.html",
     "flylight": "parcel src/flylight.html",
+    "smokeWater": "parcel src/smokeWater.html",
     "build": "parcel build"
   },
   "devDependencies": {
