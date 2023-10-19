@@ -5,10 +5,11 @@ import gsap from "gsap";
 import * as dat from "dat.gui";
 // console.log(THREE)
 
-// 倒入顶点着色器
-import basicVertexShader from "./shaders/vertex.glsl";
-// 倒入片元着色器
-import basicFragmentShader from "./shaders/fragment.glsl";
+// 导入water
+import { Water } from "three/examples/jsm/objects/Water2.js";
+
+import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(
@@ -19,9 +20,6 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 0, 10);
 scene.add(camera);
-
-//使用dat.gui
-const gui = new dat.GUI();
 
 // 初始化渲染器
 const renderer = new THREE.WebGLRenderer();
@@ -38,80 +36,57 @@ scene.add(axesHelper);
 // 设置时钟
 const clock = new THREE.Clock();
 
-const params = {
-  uWaresFrequency: 14,
-  uScale: 0.04,
-  uXzScale: 1.5,
-  uNoiseFrequency: 10,
-  uNoiseScale: 1.5,
-  uTime: 0
-};
+// 创建一个平面
+// const planeGeometry = new THREE.PlaneGeometry(1, 1, 512, 512);
+// const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+// const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 
-const shaderMaterial = new THREE.ShaderMaterial({
-  vertexShader: basicVertexShader,
-  fragmentShader: basicFragmentShader,
-  side: THREE.DoubleSide,
-  uniforms: {
-    uTime: { value: params.uTime },
-    uWaresFrequency: { value: params.uWaresFrequency },
-    uScale: { value: params.uScale },
-    uXzScale: { value: params.uXzScale },
-    uNoiseFrequency: { value: params.uNoiseFrequency },
-    uNoiseScale: { value: params.uNoiseScale },
-  },
-  transparent: true,
+// 加载场景背景
+const rgbeLoader = new RGBELoader();
+rgbeLoader.loadAsync("./model/051.hdr").then((texture) => {
+  texture.mapping = THREE.EquirectangularReflectionMapping;
+  scene.environment = texture;
+  scene.background = texture;
 });
 
-gui
-  .add(params, "uWaresFrequency")
-  .min(0)
-  .max(100)
-  .step(0.1)
-  .onChange(() => {
-    shaderMaterial.uniforms.uWaresFrequency.value = params.uWaresFrequency;
-  });
-gui
-  .add(params, "uScale", 0, 1)
-  .step(0.001)
-  .onChange(() => {
-    shaderMaterial.uniforms.uScale.value = params.uScale;
-  });
+// 加载浴缸
+const gltfLoader = new GLTFLoader();
+gltfLoader.loadAsync("./model/yugang.glb").then((gltf) => {
+  console.log(gltf);
+  const yugang = gltf.scene.children[0];
+  yugang.material.side = THREE.DoubleSide;
 
-gui
-  .add(params, "uXzScale", 0, 5)
-  .step(0.01)
-  .onChange(() => {
-    shaderMaterial.uniforms.uXzScale.value = params.uXzScale;
+  const waterGeometry = gltf.scene.children[1].geometry;
+  const water = new Water(waterGeometry, {
+    color: "#ffffff",
+    scale: 1,
+    flowDirection: new THREE.Vector2(1, 1),
+    textureWidth: 1024,
+    textureHeight: 1024,
+    side: THREE.DoubleSide,
   });
+  // plane.receiveShadow = true;
+  scene.add(water);
 
-gui
-  .add(params, "uNoiseFrequency", 0, 100)
-  .step(0.1)
-  .onChange(() => {
-    shaderMaterial.uniforms.uNoiseFrequency.value = params.uNoiseFrequency;
-  });
+  scene.add(yugang);
+});
 
-gui
-  .add(params, "uNoiseScale", 0, 5)
-  .step(0.01)
-  .onChange(() => {
-    shaderMaterial.uniforms.uNoiseScale.value = params.uNoiseScale;
-  });
-
-// 创建一个平面
-const planeGeometry = new THREE.PlaneGeometry(1, 1, 512, 512);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const plane = new THREE.Mesh(planeGeometry, shaderMaterial);
-plane.rotation.x = -0.5 * Math.PI;
-plane.receiveShadow = true;
-scene.add(plane);
+// 增加直线光
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+directionalLight.position.set(0, 10, 0);
+directionalLight.castShadow = true;
+directionalLight.shadow.camera.top = 2;
+directionalLight.shadow.camera.bottom = -2;
+directionalLight.shadow.camera.right = 2;
+directionalLight.shadow.camera.left = -2;
+directionalLight.shadow.mapSize.set(4096, 4096);
+scene.add(directionalLight);
 
 function animate() {
   requestAnimationFrame(animate);
   let time = clock.getElapsedTime();
   // required if controls.enableDamping or controls.autoRotate are set to true
   controls.update();
-  shaderMaterial.uniforms.uTime.value = time;
 
   renderer.render(scene, camera);
 }
