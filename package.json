@@ -14,6 +14,7 @@
     "shader": "parcel src/shader.html",
     "flylight": "parcel src/flylight.html",
     "smokeWater": "parcel src/smokeWater.html",
+    "particle": "parcel src/particle.html",
     "build": "parcel build"
   },
   "devDependencies": {
