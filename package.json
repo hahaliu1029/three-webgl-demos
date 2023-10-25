@@ -15,6 +15,7 @@
     "flylight": "parcel src/flylight.html",
     "smokeWater": "parcel src/smokeWater.html",
     "particle": "parcel src/particle.html",
+    "firework": "parcel src/firework.html",
     "build": "parcel build"
   },
   "devDependencies": {
