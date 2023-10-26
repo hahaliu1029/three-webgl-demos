@@ -1,4 +1,4 @@
-precision highp float;
+precision lowp float;
 attribute vec3 aStep;
 uniform float uTime;
 uniform float uSize;

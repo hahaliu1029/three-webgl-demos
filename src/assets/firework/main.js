@@ -1,6 +1,8 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import gsap from "gsap";
+// 导入FBXLoader
+import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 
 // 倒入顶点着色器
 import basicVertexShader from "./shaders/vertex.glsl";
@@ -14,6 +16,9 @@ import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 
 import Firework from "./firework";
+
+// 导入水模块
+import { Water } from "three/examples/jsm/objects/Water2.js";
 
 // console.log(THREE)
 const scene = new THREE.Scene();
@@ -70,7 +75,7 @@ const shaderMaterial = new THREE.ShaderMaterial({
 
 const gltfLoader = new GLTFLoader();
 let flylightBox = null;
-gltfLoader.load("./model/kongmingdeng.glb", (gltf) => {
+gltfLoader.load("./model/kongmingdeng1.glb", (gltf) => {
   console.log(gltf);
   const model = gltf.scene;
   // model.scale.set(0.1, 0.1, 0.1);
@@ -86,7 +91,7 @@ gltfLoader.load("./model/kongmingdeng.glb", (gltf) => {
     const flylight = model.clone(true);
     let x = (Math.random() - 0.5) * 300;
     let z = (Math.random() - 0.5) * 300;
-    let y = Math.random() + 25;
+    let y = Math.random() + 5;
     flylight.position.set(x, y, z);
     gsap.to(flylight.rotation, {
       duration: 5 + Math.random() * 30,
@@ -116,9 +121,9 @@ let fireworks = [];
 let createFirework = () => {
   let color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 80%)`; // 随机颜色  hsl(色相, 饱和度, 亮度) 0-360 0-100% 0-100%
   let position = {
-    x: (Math.random() - 0.5) * 40,
-    z: (Math.random() - 0.5) * 40,
-    y: 7 + (Math.random() - 0.5) * 25,
+    x: (Math.random() - 0.5) * 200,
+    z: (Math.random() - 0.5) * 200,
+    y: 20 + (Math.random() - 0.5) * 60,
   };
   // 生成颜色和位置
   let firework = new Firework(color, position);
@@ -131,10 +136,44 @@ document.addEventListener("click", () => {
   createFirework();
 });
 
+// 加载FBX模型
+// const fbxLoader = new FBXLoader();
+// fbxLoader.load("./model/building.FBX", (fbx) => {
+//   console.log(fbx);
+//   fbx.scale.set(0.1, 0.1, 0.1);
+//   fbx.position.set(0, -5, 0);
+//   scene.add(fbx);
+// });
+
+gltfLoader.load("./model/waitan.glb", (gltf) => {
+  console.log(gltf);
+  const model = gltf.scene;
+  model.scale.set(0.1, 0.1, 0.1);
+  model.position.set(0, -15, 0);
+  // 创建水面
+  const waterGeometry = new THREE.PlaneGeometry(1000, 1000);
+  let water = new Water(waterGeometry, {
+    scale: 4,
+    flowDirection: new THREE.Vector2(1, 1),
+    textureWidth: 1024,
+    textureHeight: 1024,
+    side: THREE.DoubleSide,
+  });
+  water.rotation.x = -Math.PI / 2;
+  water.position.y = -15.1;
+  scene.add(water);
+  gltf.scene.remove(gltf.scene.children[0])
+  scene.add(model);
+});
+
+
 function animate() {
   // 更新烟花
-  fireworks.forEach((firework) => {
-    firework.update();
+  fireworks.forEach((firework, i) => {
+    const type = firework.update();
+    if(type == "remove") {
+      fireworks.splice(i, 1);
+    }
   });
   requestAnimationFrame(animate);
   let time = clock.getElapsedTime();
@@ -143,5 +182,6 @@ function animate() {
 
   renderer.render(scene, camera);
 }
+
 
 animate();
