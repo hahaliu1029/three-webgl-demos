@@ -16,6 +16,7 @@
     "smokeWater": "parcel src/smokeWater.html",
     "particle": "parcel src/particle.html",
     "firework": "parcel src/firework.html",
+    "beforeCompile": "parcel src/beforeCompile.html",
     "build": "parcel build"
   },
   "devDependencies": {
