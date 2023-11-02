@@ -17,6 +17,7 @@
     "particle": "parcel src/particle.html",
     "firework": "parcel src/firework.html",
     "beforeCompile": "parcel src/beforeCompile.html",
+    "effectComposer": "parcel src/effectComposer.html",
     "build": "parcel build"
   },
   "devDependencies": {
