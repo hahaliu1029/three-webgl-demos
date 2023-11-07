@@ -18,6 +18,8 @@
     "firework": "parcel src/firework.html",
     "beforeCompile": "parcel src/beforeCompile.html",
     "effectComposer": "parcel src/effectComposer.html",
+    "cssRender": "parcel src/cssRender.html",
+    "curve": "parcel src/curve.html",
     "build": "parcel build"
   },
   "devDependencies": {

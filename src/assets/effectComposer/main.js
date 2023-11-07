@@ -1,6 +1,9 @@
 import * as THREE from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+// 纹理加载器
+import { TextureLoader } from "three/src/loaders/TextureLoader";
+
 // dat.gui
 import * as dat from "dat.gui";
 
@@ -73,6 +76,9 @@ const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
 // 设置时钟
 const clock = new THREE.Clock();
+
+// 创建纹理加载器
+const textureLoader = new TextureLoader();
 
 // 合成效果
 const composer = new EffectComposer(renderer);
@@ -152,7 +158,7 @@ const shaderPass = new ShaderPass(
   }),
   "tDiffuse" // tDiffuse is the default name for the texture in shaderPass
 );
-shaderPass.enabled = true;
+shaderPass.enabled = false;
 composer.addPass(shaderPass);
 gui.add(shaderPass, "enabled").name("自定义着色器效果");
 
@@ -162,11 +168,54 @@ gui.add(unrealBloomPass, "radius", 0, 1).name("半径");
 gui.add(unrealBloomPass, "threshold", 0, 1).name("阈值");
 gui.add(renderer, "toneMappingExposure", 0, 1).name("曝光度");
 
+const normalTexture = textureLoader.load("./model/DamagedHelmet/interfaceNormalMap.png");
+const techPass = new ShaderPass(
+  new THREE.ShaderMaterial({
+    uniforms: {
+      tDiffuse: { value: null },
+      resolution: { value: new THREE.Vector2(1, 1) },
+      u_normalTexture: { value: null },
+      u_time: { value: 0 },
+    },
+    vertexShader: `
+        varying vec2 vUv;
+        void main() {
+            vUv = uv;
+            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1 );
+        }
+        `,
+    fragmentShader: `
+        uniform sampler2D tDiffuse;
+        varying vec2 vUv;
+        uniform sampler2D u_normalTexture;
+        uniform float u_time;
+        void main() {
+            vec2 newUv = vUv;
+            newUv += sin(newUv.x * 10.0 + u_time * 0.5) * 0.03;
+
+            vec4 texel = texture2D( tDiffuse, newUv );
+            vec4 normalTexel = texture2D( u_normalTexture, vUv );
+            // 设置光线的角度
+            vec3 lightDirection = normalize(vec3(-5.0, 5.0, 2.0));
+            float lightness = clamp(dot(normalTexel.xyz, lightDirection), 0.0, 1.0);
+            // 通过光线角度设置颜色
+            texel.xyz += lightness;
+            gl_FragColor = texel;
+        }
+        `,
+  }),
+  "tDiffuse" // tDiffuse is the default name for the texture in shaderPass
+);
+techPass.material.uniforms.u_normalTexture.value = normalTexture;
+composer.addPass(techPass);
+
 function animate() {
   requestAnimationFrame(animate);
   let time = clock.getElapsedTime();
   // required if controls.enableDamping or controls.autoRotate are set to true
   controls.update();
+
+  techPass.material.uniforms.u_time.value = time;
 
   //   renderer.render(scene, camera);
   composer.render();
