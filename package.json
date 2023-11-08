@@ -20,6 +20,7 @@
     "effectComposer": "parcel src/effectComposer.html",
     "cssRender": "parcel src/cssRender.html",
     "curve": "parcel src/curve.html",
+    "flowerDeformation": "parcel src/flowerDeformation.html",
     "build": "parcel build"
   },
   "devDependencies": {
